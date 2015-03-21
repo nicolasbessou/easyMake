@@ -1,10 +1,8 @@
 #------------------------------------------------------------------------------#
-# Makefile boilerplate
+# easyMake simplifies the way you write makefiles.
 #
 # Copyright (c) 2015 Nicolas BESSOU
 #------------------------------------------------------------------------------#
-
-#NB: TODO: Finish to set local configuration and their comments
 
 #--------------------------------------------------------
 #---- Local configuration
@@ -12,11 +10,25 @@
 
 #### Target configuration
 
+# Kind of binary file to build (it can be either: exe, dll or lib)
+BUILD ?=
+
 # Target name :
 # if static  library (BUILD = lib): binary name will be lib$(TARGET).a
 # if dynamic library (BUILD = dll): binary name will be lib$(TARGET).so
-# if executable      (BUILD = exe): binary name will be $(TARGET)
+# if executable      (BUILD = exe): binary name will be $(TARGET).
 TARGET ?= out
+
+# Source files to compile
+SRCS ?=
+
+# Source files directory (SRCS path must be relative to SRC_DIR)
+SRC_DIR ?= .
+# Include header directories (without -I)
+INC_DIRS ?= .
+
+# External libraries to be linked with target.
+LIBS ?=
 
 # Sub makefiles of static libraries that needs to be linked with current target.
 # Requirements:
@@ -29,14 +41,21 @@ SUB_LIBS ?=
 # The current target won't be linked with SUBS (use SUB_LIBS to auto-link with target)
 SUB_MAKEFILES ?=
 
-#SRCS = XXX.c
 
 #### Compilation configuration ####
-
 # (debug, release)
-export CONFIG            ?= release
+export CONFIG ?= release
 # (x86, x64)
-export ARCH              ?= x64
+export ARCH ?= x64
+
+
+#### Run configuration ####
+
+# You can run the final target using "make run" if it's an executable.
+# You can add command line arguments to pass to the executable by setting CMD_ARGS.
+# For example "make run CMD_ARGS=--foo=2 -bar"
+CMD_ARGS ?=
+
 
 #### Compilation flags ####
 
@@ -45,13 +64,13 @@ export ADD_DEFAULT_FLAGS ?= true
 # Architecture flags (will make ARCH useless if overwritten)
 export ARCH_FLAG
 # Extra flags
-export EXTRACFLAGS
+EXTRACFLAGS ?=
 # Preprocessor flags (without -D)
-export CPPFLAGS
+CPPFLAGS ?=
 # Optimization flags
-export COFLAGS
+COFLAGS ?=
 # Link flags
-export LDOFLAGS
+LDOFLAGS ?=
 
 #### Compilation and system tools ####
 
@@ -72,10 +91,6 @@ export MKDIR             ?= mkdir
 export BIN_DIR           ?= _bin/$(CONFIG)_$(ARCH)
 # Object directory where object and dependency files will be written
 export OBJ_DIR           ?= _obj/$(CONFIG)_$(ARCH)
-# Source files directory (SRCS path must be relative to SRC_DIR)
-SRC_DIR                  ?= .
-# Include directories (without -I)
-INC_DIRS                 ?= .
 
 #### Miscellaneous ####
 
@@ -103,7 +118,7 @@ endif
 ifeq ($(ADD_DEFAULT_FLAGS),true)
     ifeq ($(CONFIG),debug)
         CPPFLAGS += DEBUG
-        COFLAGS  += -g
+        COFLAGS  += -g -O0
         LDOFLAGS += -g
     else
         CPPFLAGS += NDEBUG
@@ -113,15 +128,15 @@ ifeq ($(ADD_DEFAULT_FLAGS),true)
 endif
 
 #### Compilation flags ####
-CFLAGS  += $(ARCH_FLAG)
+CFLAGS  := $(ARCH_FLAG)
 CFLAGS  += $(COFLAGS)
 CFLAGS  += $(EXTRACFLAGS)
 CFLAGS  += $(CPPFLAGS:%=-D%)
 CFLAGS  += $(INC_DIRS:%=-I%)
 
 #### Link flags ####
-LDFLAGS +=$(ARCH_FLAG) $(LDOFLAGS)
-SOFLAGS +=$(ARCH_FLAG)
+LDFLAGS  = $(ARCH_FLAG) $(LDOFLAGS)
+SOFLAGS  = $(ARCH_FLAG)
 
 #--------------------------------------------------------
 #---- OBJECTS AND DEPENDENCIES
@@ -236,7 +251,7 @@ $(SUBS_CLEAN):
 #--------------------------------------------------------
 #---- PHONY TARGETS
 #--------------------------------------------------------
-.PHONY: all build clean
+.PHONY: all build clean run
 
 # Set defualt target
 .DEFAULT_GOAL := all
@@ -251,4 +266,10 @@ build: $(SUBS_BUILD) $(FINAL_TARGET)
 clean: $(SUBS_CLEAN)
 	@echo "Cleaning $(TARGET) with configuration $(CONFIG)_$(ARCH)"
 	@-$(RM) -f $(OBJS) $(DEPS) $(FINAL_TARGET)
+
+#### Run built target (only for executables) ####
+ifeq ($(BUILD),exe)
+run: build
+	./$(FINAL_TARGET) $(CMD_ARGS)
+endif
 
