@@ -88,9 +88,9 @@ export MKDIR             ?= mkdir
 #### Directory configuration ####
 
 # Binary directory where binary files will be written
-export BIN_DIR           ?= _bin/$(CONFIG)_$(ARCH)
+export BIN_DIR           ?= __bin/$(CONFIG)_$(ARCH)
 # Object directory where object and dependency files will be written
-export OBJ_DIR           ?= _obj/$(CONFIG)_$(ARCH)
+export OBJ_DIR           ?= __obj/$(CONFIG)_$(ARCH)
 
 #### Miscellaneous ####
 
