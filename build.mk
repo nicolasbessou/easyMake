@@ -208,7 +208,7 @@ $$(OBJ_DIR)/%.d: $$(SRC_DIR)/%$(1)
 	@echo "Generate dependencies --> $$(<F)"
 	@$$(MKDIR) -p $$(dir $$@)
 	@$(2) -MM $$(CFLAGS) $(3) -o $$@d $$<
-	@sed 's@$$(notdir $$(@:%.d=%\.o))@$$(@:%.d=%.o) $$@@g' $$@d > $$@
+	@sed 's@$$(notdir $$(@:%.d=%.o))@$$(@:%.d=%.o) $$@@g' $$@d > $$@
 	@rm -f $$@d
 endef
 
@@ -220,7 +220,7 @@ $(foreach EXT,$(CXX_SRC_EXTS), $(eval $(call ADD_DEPS_RULE,$(EXT),$(CXX),$(STD_C
 
 #### compiling object files ####
 define ADD_OBJS_RULE
-$$(OBJ_DIR)/%.o: $$(SRC_DIR)/%$(1)
+$$(OBJ_DIR)/%.o: $$(SRC_DIR)/%$(1) $$(OBJ_DIR)/%.d
 	@echo "Compiling --> $$(<F)"
 	@$$(MKDIR) -p $$(dir $$@)
 	@$(2) -c $$(CFLAGS) $(3) -o $$@ $$<
