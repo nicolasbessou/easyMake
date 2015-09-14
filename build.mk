@@ -124,7 +124,7 @@ ifeq ($(ADD_DEFAULT_FLAGS),true)
         CPPFLAGS += NDEBUG
         COFLAGS  += -O3
     endif
-    EXTRACFLAGS +=-Wall -Wextra -fvisibility=hidden
+    EXTRACFLAGS +=-Wall -Wextra -fvisibility=hidden -fopenmp
 endif
 
 #### Compilation flags ####
@@ -136,7 +136,7 @@ CFLAGS  += $(INC_DIRS:%=-I%)
 
 #### Link flags ####
 LDFLAGS  = $(ARCH_FLAG) $(LDOFLAGS)
-SOFLAGS  = $(ARCH_FLAG)
+SOFLAGS  = $(ARCH_FLAG) -fopenmp
 
 #--------------------------------------------------------
 #---- OBJECTS AND DEPENDENCIES
